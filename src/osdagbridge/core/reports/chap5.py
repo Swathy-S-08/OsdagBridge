@@ -1136,6 +1136,8 @@ This section presents all structural design checks performed by OsdagBridge. For
 \begin{longtable}{|C{2.5cm}|L{6.5cm}|>{\arraybackslash}p{6.5cm}|}
 \caption{\textbf{Stiffener Design Summary}}
 \hline
+\textbf{Girder} & \textbf{Parameter} & \textbf{Value} \\[6pt]
+\hline
 """ + t57_content + r"""
 \end{longtable}
 """ + t58_block + r"""

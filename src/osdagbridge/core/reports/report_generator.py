@@ -120,6 +120,7 @@ from osdagbridge.core.utils.common import (
 
 from osdagbridge.core.reports.report_utils import _tex
 from .executive_summary import executive_summary
+from .longtable_headers import add_longtable_headers
 from .chap1 import ch1_project_info
 from .chap2 import ch2_input_parameters
 from .chap3 import ch3_loads
@@ -204,8 +205,6 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 % Prevent tables from overflowing past the page bottom:
 % if fewer than 5 baseline-skips remain, break to the next page first.
 \BeforeBeginEnvironment{table}{\needspace{5\baselineskip}}
-\BeforeBeginEnvironment{longtable}{\needspace{5\baselineskip}}
-
 \definecolor{osdagGreen}{HTML}{91B014}
 
 \fancypagestyle{main}{
@@ -940,12 +939,9 @@ def generate_report(payload, request):
             doc_parts.append(r"\end{document}")
 
             full_tex = "\n".join(doc_parts)
+            full_tex = add_longtable_headers(full_tex)
 
 
-            # NOTE: longtable header repetition is handled per-table in each
-            # chapter file (e.g. \endfirsthead / \endhead).  No automatic
-            # post-processing is applied here to avoid mis-ordering captions
-            # and column headings.
 
             tmp_tex = os.path.join(tmp_dir, request.file_stem + '.tex')
             tmp_pdf = os.path.join(tmp_dir, request.file_stem + '.pdf')
