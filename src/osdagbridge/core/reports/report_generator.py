@@ -121,6 +121,7 @@ from osdagbridge.core.utils.common import (
 from osdagbridge.core.reports.report_utils import _tex
 from .executive_summary import executive_summary
 from .longtable_headers import add_longtable_headers
+from .table_layout import fit_table_widths
 from .chap1 import ch1_project_info
 from .chap2 import ch2_input_parameters
 from .chap3 import ch3_loads
@@ -157,7 +158,7 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 \documentclass[12pt,a4paper]{report}
 
 % Packages
-\usepackage[a4paper, margin=1in]{geometry}
+\usepackage[a4paper, margin=1in, footskip=38pt]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -940,6 +941,7 @@ def generate_report(payload, request):
 
             full_tex = "\n".join(doc_parts)
             full_tex = add_longtable_headers(full_tex)
+            full_tex = fit_table_widths(full_tex)
 
 
 

@@ -29,6 +29,9 @@ _LT_END = "\\end{longtable}"
 _ROW_END = re.compile(r"\\\\(\*)?(\[[^\]]*\])?")
 _RULE = re.compile(r"\s*(\\hline|\\cline\{[^}]*\})")
 _COL_LETTERS = "lcrpmbLCRX"
+# Closing rule drawn at the bottom of a table whenever it breaks across pages.
+# The negative skip makes it overlap (not double up with) an existing \hline.
+_FOOT = "\\noalign{\\vskip-\\arrayrulewidth}\\hline\n\\endfoot\n"
 
 
 # --------------------------------------------------------------------------- #
@@ -110,6 +113,23 @@ def _count_cols(spec):
             n += 1
     return n
 
+_MULTIROW = re.compile(r"\\multirow\{\d+\}\{\*\}\{")
+
+
+def _unmerge_row_labels(s):
+    """\\multirow{N}{*}{G1} -> G1 (label stays in the group's first row)."""
+    out, pos = [], 0
+    while True:
+        m = _MULTIROW.search(s, pos)
+        if not m:
+            out.append(s[pos:])
+            break
+        brace = m.end() - 1
+        end = _match_brace(s, brace)
+        out.append(s[pos:m.start()])
+        out.append(s[brace + 1:end])
+        pos = end + 1
+    return "".join(out)
 
 # --------------------------------------------------------------------------- #
 # one table
@@ -118,7 +138,8 @@ def _process_body(body, spec):
     m = re.search(r"\\endfirsthead(.*?)\\endhead", body, re.S)
     if m and m.group(1).strip():
         # already has a working repeating header (e.g. Table 4.1)
-        return body
+        foot = "" if "\\endfoot" in body else "\n" + _FOOT
+        return body[:m.end()] + foot + _unmerge_row_labels(body[m.end():])
     if m:  # empty \endfirsthead\endhead pair (Table 2.8) -> drop and rebuild
         body = body[:m.start()] + body[m.end():]
 
@@ -144,7 +165,7 @@ def _process_body(body, spec):
         # first row does not look like a header: only fix the caption (e.g. key/value tables)
         cap = (caption + "\\\\\n") if caption else ""
         return ("\n" + cap + (pre + "\n" if pre else "")
-                + body[i:].lstrip())
+                + _unmerge_row_labels(body[i:].lstrip()))
 
     post, i = _take_rules(body, r[1])
     rest = body[i:]
@@ -163,8 +184,10 @@ def _process_body(body, spec):
             % ncols
         )
     parts.append(block + "\n\\endhead\n")
-    parts.append(rest)
+    parts.append(_FOOT)
+    parts.append(_unmerge_row_labels(rest))
     return "".join(parts)
+
 
 
 # --------------------------------------------------------------------------- #

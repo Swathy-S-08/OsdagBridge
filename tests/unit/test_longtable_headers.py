@@ -98,8 +98,10 @@ def test_makecell_header_with_inner_backslashes_kept_whole():
     assert t.count(r"\makecell{\textbf{Max}\\\textbf{(kN)}}") == 2
 
 
-def test_existing_header_untouched_and_empty_pair_rebuilt():
-    assert add_longtable_headers(ALREADY_OK) == ALREADY_OK
+def test_existing_header_kept_and_empty_pair_rebuilt():
+    out = add_longtable_headers(ALREADY_OK)
+    assert out.count(r"\textbf{A}") == 2          # header not duplicated
+    assert out.count(r"\endhead") == 1
     t = _tables(add_longtable_headers(EMPTY_PAIR))[0]
     assert t.count(r"\textbf{A}") == 2
 
@@ -112,3 +114,27 @@ def test_table_without_header_row_is_left_without_heads():
 def test_idempotent():
     once = add_longtable_headers(SIMPLE + MAKECELL_HEADER + NO_HEADER)
     assert add_longtable_headers(once) == once
+
+
+MULTIROW_BODY = r"""
+\begin{longtable}{|C{2cm}|C{3cm}|}
+\caption{T}\\
+\hline \textbf{Girder} & \textbf{Value} \\ \hline
+\multirow{2}{*}{\makecell{G1}} & a \\[6pt]
+\cline{2-2}
+ & b \\[6pt]
+\hline
+\end{longtable}
+"""
+
+
+def test_multirow_label_kept_in_first_row_only():
+    t = _tables(add_longtable_headers(MULTIROW_BODY))[0]
+    assert r"\multirow" not in t
+    assert t.count(r"\makecell{G1}") == 1
+
+def test_closing_rule_added_at_page_breaks():
+    for src in (SIMPLE, MAKECELL_HEADER, ALREADY_OK, EMPTY_PAIR):
+        for t in _tables(add_longtable_headers(src)):
+            assert t.count(r"\endfoot") == 1
+            assert t.split(r"\endfoot")[0].rstrip().endswith(r"\hline")
