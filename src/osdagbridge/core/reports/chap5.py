@@ -5,6 +5,19 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+import logging
+import os
+
+from osdagbridge.core.reports.ur_charts import build_ur_charts
+
+logger = logging.getLogger(__name__)
+
+
+class _URStr(str):
+    """A formatted UR cell that remembers its numeric value (for the charts)."""
+    raw = None
+
+
 from osdagbridge.core.utils.common import (
     KEY_DD_AS_BOT,
     KEY_DD_AS_LONG,
@@ -145,7 +158,7 @@ from osdagbridge.core.reports.report_utils import _tex, _render_value, get_girde
 
 if TYPE_CHECKING:
     pass
-def ch5_design_checks(checks_data, bridge) -> str:
+def ch5_design_checks(checks_data, bridge, images_dir=None) -> str:
     """Chapter 5 — Design Checks.
 
     Parameters
@@ -878,7 +891,9 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
         except (TypeError, ValueError):
             return ""
         s = f"{f:.2f}"
-        return (r"\textcolor{red}{" + s + "}") if f > 1.0 else s
+        out = _URStr((r"\textcolor{red}{" + s + "}") if f > 1.0 else s)
+        out.raw = f
+        return out
 
     def _lc_short(lc):
         # Show the full combination expression as-is, e.g.
@@ -975,8 +990,11 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
         ratio, sf, lim = best
         return ("---", f"{sf:.1f}", f"{lim:.0f}", _ur_522(ratio))
 
+    _ur_rows = []   # (label, numeric UR or None) for the Section 5.5 charts
+
     def _row522(label, cells):
         c = [x if x else "---" for x in cells]
+        _ur_rows.append((label, getattr(cells[3], "raw", None)))
         return label + r" & " + r" & ".join(c) + r" \\[6pt]" + "\n\\hline"
 
     # Deck rows: Demand/Capacity from deck_report_values (KEY_DD_*, the same dict
@@ -999,6 +1017,7 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
 
     def _row522_msg(label, msg):
         # Single message spanning the 4 data columns.
+        _ur_rows.append((label, None))
         return label + r" & \multicolumn{4}{c|}{" + msg + r"} \\[6pt]" + "\n\\hline"
 
     # End diaphragm: when configured as Cross Bracing it is designed as bracing
@@ -1064,6 +1083,26 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
         _ed_shear_row,
     ]
     t522_content = "\n".join(_t522)
+
+    # UR bar charts (Section 5.5): drawn into the report's temporary images folder.
+    ur_charts_tex = ""
+    if images_dir:
+        try:
+            _names = build_ur_charts(_ur_rows, images_dir)
+        except Exception:
+            logger.exception("Could not draw the utilization-ratio charts")
+            _names = []
+        _caps = {
+            "ur_by_element.png": "Governing utilization ratio of each primary element",
+            "ur_all_checks.png": "Utilization ratio of every design check (red dashed line: UR = 1.0)",
+        }
+        for _n in _names:
+            _p = os.path.join(images_dir, _n).replace("\\", "/")
+            ur_charts_tex += (
+                "\\begin{figure}[H]\n\\centering\n"
+                "\\includegraphics[width=0.92\\textwidth]{" + _p + "}\n"
+                "\\caption{" + _caps[_n] + "}\n\\end{figure}\n\n"
+            )
 
     return r"""
 \chapter{Design Checks}
@@ -1503,5 +1542,6 @@ End diaphragms at the supports transfer transverse loads to the bearings, restra
 \end{longtable}
 \noindent\textit{Note: UR = Demand / Capacity. All values $\leq 1.0$ indicate passing checks. The governing check for each component is highlighted in the individual design check sections above.}
 
-"""
+""" + ur_charts_tex + r"""
 
+"""
