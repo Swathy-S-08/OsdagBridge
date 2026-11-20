@@ -1,15 +1,9 @@
 """Tests for repeating longtable headers in the generated LaTeX report."""
-import importlib.util
-import pathlib
 import re
 
-# Load the module by path so the test does not need the Qt/analysis stack.
-_PATH = (pathlib.Path(__file__).resolve().parents[2]
-         / "src" / "osdagbridge" / "core" / "reports" / "longtable_headers.py")
-_spec = importlib.util.spec_from_file_location("longtable_headers", _PATH)
-_mod = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_mod)
-add_longtable_headers = _mod.add_longtable_headers
+from _report_modules import load
+
+add_longtable_headers = load("longtable_headers").add_longtable_headers
 
 
 def _tables(tex):
