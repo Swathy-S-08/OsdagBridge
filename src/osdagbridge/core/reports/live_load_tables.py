@@ -132,12 +132,12 @@ def _vehicle_table(input_dict, irc6):
     rows = _vehicle_rows(input_dict, irc6)
     header = (r"\textbf{Vehicle} & \textbf{Total Load (kN)} & \textbf{Impact Factor} & "
               r"\textbf{Braking Considered?} & \textbf{Braking Value (kN)} & "
-              r"\textbf{Braking Eccentricity (m)} & \textbf{Centri\-fugal Force (kN)} \\[6pt]")
+              r"\textbf{Braking Eccentricity (m)} & \textbf{Centri\-fugal Force (kN)} \\[\rowgap]")
     if rows:
         body = "\n".join(
-            " & ".join(r) + r" \\[6pt]" + "\n" + r"\hline" for r in rows)
+            " & ".join(r) + r" \\[\rowgap]" + "\n" + r"\hline" for r in rows)
     else:
-        body = (r"\multicolumn{7}{|c|}{No vehicle class selected} \\[6pt]" + "\n" + r"\hline")
+        body = (r"\multicolumn{7}{|c|}{No vehicle class selected} \\[\rowgap]" + "\n" + r"\hline")
     return (
         "\\vspace{1em}\n"
         "\\begin{longtable}{|L{2.6cm}|C{1.5cm}|C{1.4cm}|C{1.8cm}|C{1.7cm}|C{2.0cm}|C{2.0cm}|}\n"
@@ -178,10 +178,10 @@ def _footpath_table(input_dict, irc6):
         "\\caption{\\textbf{Live Loads (LL) --- Footpath Live Load}}\n"
         "\\hline\n"
         "\\textbf{Footpath} & \\textbf{Pressure Mode} & \\textbf{Pressure (kN/m\\textsuperscript{2})} "
-        "& \\textbf{Reference} \\\\[6pt]\n"
+        "& \\textbf{Reference} \\\\[\\rowgap]\n"
         "\\hline\n"
         + (_tex(footpath) if footpath else DASH) + " & " + mode_s + " & " + pressure
-        + " & " + ref + " \\\\[6pt]\n"
+        + " & " + ref + " \\\\[\\rowgap]\n"
         "\\hline\n"
         "\\end{longtable}\n"
     )

@@ -11,10 +11,13 @@ scales those widths down (only if needed) so the whole table fits.
 """
 import re
 
-TEXT_WIDTH_PT = 450.7      # A4, geometry margin=1in  ->  595.28 - 2*72.27
-SAFETY_PT = 1.5
-TABCOLSEP_PT = 6.0         # \setlength{\tabcolsep}{6pt} in the preamble
-RULE_PT = 0.5              # \setlength{\arrayrulewidth}{0.5pt}
+from . import theme
+
+# All of these follow the page geometry and table settings in theme.py.
+TEXT_WIDTH_PT = theme.TEXT_WIDTH_PT
+SAFETY_PT = theme.TABLE_FIT_SAFETY_PT
+TABCOLSEP_PT = theme.TABCOLSEP_PT
+RULE_PT = theme.RULE_PT
 _UNIT_PT = {"cm": 28.4528, "mm": 2.84528, "pt": 1.0, "in": 72.27}
 _WIDTH = re.compile(r"^\s*([\d.]+)\s*(cm|mm|pt|in)\s*$")
 _BEGIN = re.compile(r"\\begin\{(longtable|tabular)\}(\[[^\]]*\])?\{")

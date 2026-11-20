@@ -1,6 +1,7 @@
 import logging
 import os
 
+from osdagbridge.core.reports import theme
 from osdagbridge.core.reports.quantity_charts import build_quantity_charts
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ def ch7_quantities(input_dict, images_dir=None):
             _p = os.path.join(images_dir, _n).replace("\\", "/")
             charts_tex += (
                 "\\begin{figure}[H]\n\\centering\n"
-                "\\includegraphics[width=0.78\\textwidth]{" + _p + "}\n"
+                "\\includegraphics[width=" + theme.FIG_WIDTH_QTY_CHARTS + "]{" + _p + "}\n"
                 "\\caption{" + _caps[_n] + "}\n\\end{figure}\n\n"
             )
         if _names:
@@ -43,7 +44,7 @@ def ch7_quantities(input_dict, images_dir=None):
 \noindent\textbf{Table 7.1  Bill of Materials (Steel, Concrete, and Reinforcement Quantities)}
 
 \begingroup
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{\tabcolseptight}
 \begin{longtable}{|C{1.0cm}|L{3.8cm}|C{2.6cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|}
 \hline
 \textbf{S.N.} & \textbf{Item Description} & \textbf{Volume} & \textbf{Quantity} & \textbf{Total Volume} & \textbf{Weight (MT)} & \textbf{Total Weight (MT)} \\

@@ -21,17 +21,19 @@ from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
+from . import theme
+
 ELEMENTS = [
     # (key, display name, bar colour)
-    ("girder", "Steel Plate Girders", "#2f6f9f"),
-    ("deck",   "Concrete Deck Slab",  "#6a9f58"),
-    ("cb",     "Cross Bracing",       "#d08c2e"),
-    ("ed",     "End Diaphragms",      "#7b5ea7"),
+    ("girder", "Steel Plate Girders", theme.CHART_ELEMENT_COLOURS["girder"]),
+    ("deck",   "Concrete Deck Slab",  theme.CHART_ELEMENT_COLOURS["deck"]),
+    ("cb",     "Cross Bracing",       theme.CHART_ELEMENT_COLOURS["cb"]),
+    ("ed",     "End Diaphragms",      theme.CHART_ELEMENT_COLOURS["ed"]),
 ]
 _COLOUR = {k: c for k, _, c in ELEMENTS}
 _NAME = {k: n for k, n, _ in ELEMENTS}
-FAIL_EDGE = "#c0392b"
-LIMIT_COLOUR = "#e00000"
+FAIL_EDGE = theme.CHART_FAIL_EDGE
+LIMIT_COLOUR = theme.CHART_LIMIT_COLOUR
 
 
 def element_of(label):
@@ -57,7 +59,7 @@ def _clean(label):
 
 def _save(fig, path):
     FigureCanvasAgg(fig)
-    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=theme.CHART_DPI, bbox_inches="tight", facecolor="white")
 
 
 def _limit_line(ax):
@@ -80,7 +82,7 @@ def _bar(ax, x, value, colour):
            linewidth=1.8 if failing else 0.8,
            hatch="//" if failing else None)
     ax.text(x, value, "%.2f" % value, ha="center", va="bottom", fontsize=8.5,
-            fontweight="bold", color=FAIL_EDGE if failing else "#222222", zorder=5,
+            fontweight="bold", color=FAIL_EDGE if failing else theme.CHART_TEXT, zorder=5,
             bbox=dict(facecolor="white", edgecolor="none", pad=0.8, alpha=0.9))
 
 
@@ -113,7 +115,7 @@ def _by_element_chart(rows, path):
             _bar(ax, i, best[k], colour)
         else:
             ax.text(i, 0.04 * top, "N/A\n(not designed)", ha="center", va="bottom",
-                    fontsize=8, color="#666666", zorder=4)
+                    fontsize=8, color=theme.CHART_MUTED_TEXT, zorder=4)
     _limit_line(ax)
     _style(ax, top * 1.18)
     ax.set_xlim(-0.6, len(ELEMENTS) - 0.4)

@@ -4,6 +4,7 @@ from osdagbridge.core.utils.common import (
     KEY_MP_GIRDER_DEPTH,
     KEY_TS_NO_OF_GIRDERS
 )
+from osdagbridge.core.reports import theme
 
 
 def _tex(value):
@@ -73,7 +74,7 @@ def get_girder_entries(input_dict):
     return entries
 
 
-def _fig_or_placeholder(path, caption, width=r'0.9\textwidth'):
+def _fig_or_placeholder(path, caption, width=theme.FIG_WIDTH_DEFAULT):
     """Embed figure if path is provided (file already copied to assets), else show placeholder box.
     path is the relative path as pdflatex will see it (e.g. 'assets/plan.png').
     """
@@ -86,13 +87,13 @@ def _fig_or_placeholder(path, caption, width=r'0.9\textwidth'):
                 r'\end{figure}')
     return (r'\begin{figure}[H]' + '\n'
             r'\centering' + '\n'
-            r'\fbox{\parbox{0.97\textwidth}{' + '\n'
+            r'\fbox{\parbox{' + theme.PLACEHOLDER_BOX_WIDTH + r'}{' + '\n'
             r'\textit{[ PLACEHOLDER: ' + caption + r' ]}' + '\n'
             r'}}' + '\n'
             r'\caption*{' + caption + '}\n'
             r'\end{figure}')
 
-def _fig_embed(path, caption, width=r'\textwidth', height=None):
+def _fig_embed(path, caption, width=theme.FIG_WIDTH_FULL, height=None):
     """Embed a real figure when path is provided (already copied); otherwise use an fbox placeholder."""
     if path:
         p = path.replace('\\', '/')
@@ -108,7 +109,7 @@ def _fig_embed(path, caption, width=r'\textwidth', height=None):
                 r'\vspace{-0.5em}' + '\n'
                 r'\end{figure}')
     # fbox placeholder — matches template exactly
-    return (r'\noindent\fbox{\parbox{0.97\textwidth}{' + '\n'
+    return (r'\noindent\fbox{\parbox{' + theme.PLACEHOLDER_BOX_WIDTH + r'}{' + '\n'
             r'\textit{[ PLACEHOLDER: ' + caption + r' ]}' + '\n'
             r'}}')
 

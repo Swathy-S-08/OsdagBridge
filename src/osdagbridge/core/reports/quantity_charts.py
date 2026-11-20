@@ -19,11 +19,13 @@ import os
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
-STEEL_COLOUR = "#2f6f9f"
-BRACING_COLOUR = "#d08c2e"
-DIAPHRAGM_COLOUR = "#7b5ea7"
-CONCRETE_COLOUR = "#8c8c8c"
-REBAR_COLOUR = "#b5532e"
+from . import theme
+
+STEEL_COLOUR = theme.CHART_STEEL
+BRACING_COLOUR = theme.CHART_BRACING
+DIAPHRAGM_COLOUR = theme.CHART_DIAPHRAGM
+CONCRETE_COLOUR = theme.CHART_CONCRETE
+REBAR_COLOUR = theme.CHART_REBAR
 
 
 def _num(value):
@@ -60,7 +62,7 @@ def concrete_and_rebar(q):
 
 def _save(fig, path):
     FigureCanvasAgg(fig)
-    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=theme.CHART_DPI, bbox_inches="tight", facecolor="white")
 
 
 def _clean_axes(ax):
@@ -78,11 +80,11 @@ def _steel_chart(q, path):
     for i, (label, val, colour) in enumerate(items):
         if val is None:
             ax.text(i, 0.03 * top, "not in BOM", ha="center", va="bottom",
-                    fontsize=8.5, color="#666666", style="italic")
+                    fontsize=8.5, color=theme.CHART_MUTED_TEXT, style="italic")
         else:
             ax.bar(i, val, width=0.55, color=colour, zorder=2)
             ax.text(i, val, "%.2f MT" % val, ha="center", va="bottom", fontsize=9,
-                    fontweight="bold", color="#222222", zorder=3)
+                    fontweight="bold", color=theme.CHART_TEXT, zorder=3)
     _clean_axes(ax)
     ax.set_ylim(0, top * 1.18)
     ax.set_xlim(-0.6, len(items) - 0.4)
@@ -97,12 +99,12 @@ def _panel(ax, value, colour, fmt, ylabel, xlabel):
     """One single-bar panel with its own Y-axis (units differ between panels)."""
     if value is None:
         ax.text(0, 0.03, "not in BOM", ha="center", va="bottom", fontsize=8.5,
-                color="#666666", style="italic")
+                color=theme.CHART_MUTED_TEXT, style="italic")
         top = 1.0
     else:
         ax.bar(0, value, width=0.5, color=colour, zorder=2)
         ax.text(0, value, fmt % value, ha="center", va="bottom", fontsize=9.5,
-                fontweight="bold", color="#222222", zorder=3)
+                fontweight="bold", color=theme.CHART_TEXT, zorder=3)
         top = value
     _clean_axes(ax)
     ax.set_ylim(0, top * 1.18)
